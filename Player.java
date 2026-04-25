@@ -1,16 +1,14 @@
 import entity.Entity;
 import java.awt.*;
 import java.awt.image.*;
-import javax.imageio.*;
 import java.io.*;
+import javax.imageio.*;
 
 public class Player extends Entity {
 
-    // Référence au gamePanel et au clavier
-    private GamePanel gp;
+    private GamePanel  gp;
     private KeyHandler keyH;
 
-    // Position FIXE du joueur à l'écran (toujours au centre)
     public final int ecranX;
     public final int ecranY;
 
@@ -18,11 +16,9 @@ public class Player extends Entity {
         this.gp   = gp;
         this.keyH = keyH;
 
-        // Le joueur est toujours affiché au centre de l'écran
         ecranX = gp.largeurEcran / 2 - gp.tailleTuile / 2;
         ecranY = gp.hauteurEcran / 2 - gp.tailleTuile / 2;
 
-        // Rectangle de collision (centré, un peu plus petit que la tuile)
         collision = new Rectangle(8, 16, 32, 32);
 
         reinitialiser();
@@ -30,42 +26,53 @@ public class Player extends Entity {
     }
 
     public void reinitialiser() {
-        // Position de départ dans le monde
-        mondeX = gp.tailleTuile * 10;
-        mondeY = gp.tailleTuile * 10;
-        vitesse = 4;
+        mondeX    = gp.tailleTuile * 10;
+        mondeY    = gp.tailleTuile * 10;
+        vitesse   = 4;
         direction = "bas";
     }
 
     private void chargerImages() {
-        // Pour l'instant : rectangles colorés
-        // On remplacera par de vrais sprites à l'étape 4
-        bas1    = creerSpritePlaceholder(new Color(100, 149, 237));
-        bas2    = creerSpritePlaceholder(new Color(90,  139, 227));
-        haut1   = creerSpritePlaceholder(new Color(80,  129, 217));
-        haut2   = creerSpritePlaceholder(new Color(70,  119, 207));
-        gauche1 = creerSpritePlaceholder(new Color(60,  109, 197));
-        gauche2 = creerSpritePlaceholder(new Color(50,   99, 187));
-        droite1 = creerSpritePlaceholder(new Color(40,   89, 177));
-        droite2 = creerSpritePlaceholder(new Color(30,   79, 167));
+        try {
+            bas1    = chargerSprite("kai", "bas_1");
+            bas2    = chargerSprite("kai", "bas_2");
+            haut1   = chargerSprite("kai", "haut_1");
+            haut2   = chargerSprite("kai", "haut_2");
+            gauche1 = chargerSprite("kai", "gauche_1");
+            gauche2 = chargerSprite("kai", "gauche_2");
+            droite1 = chargerSprite("kai", "droite_1");
+            droite2 = chargerSprite("kai", "droite_2");
+            System.out.println("Sprites de Kai charges");
+        } catch (Exception e) {
+            System.out.println("Sprites non trouves, placeholders utilises.");
+            chargerPlaceholders();
+        }
     }
 
-    // Crée une image colorée temporaire (placeholder)
+    private BufferedImage chargerSprite(String perso, String nom)
+            throws Exception {
+        return ImageIO.read(
+            new File("assets/sprites/" + perso + "/" + nom + ".png"));
+    }
+
+    private void chargerPlaceholders() {
+        bas1 = bas2 = haut1 = haut2 =
+        gauche1 = gauche2 = droite1 = droite2 =
+            creerSpritePlaceholder(new Color(100, 149, 237));
+    }
+
     private BufferedImage creerSpritePlaceholder(Color couleur) {
         BufferedImage img = new BufferedImage(
             gp.tailleTuile, gp.tailleTuile,
             BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
 
-        // Corps
         g2.setColor(couleur);
         g2.fillRect(8, 0, 32, 48);
 
-        // Tête
         g2.setColor(new Color(255, 220, 185));
         g2.fillOval(12, 0, 24, 24);
 
-        // Yeux
         g2.setColor(Color.BLACK);
         g2.fillOval(17, 8, 4, 4);
         g2.fillOval(27, 8, 4, 4);
@@ -78,13 +85,11 @@ public class Player extends Entity {
         boolean enMouvement = false;
 
         if (keyH.haut)   { direction = "haut";   enMouvement = true; }
-        if (keyH.bas)    { direction = "bas";    enMouvement = true; }
-        if (keyH.gauche) { direction = "gauche"; enMouvement = true; }
-        if (keyH.droite) { direction = "droite"; enMouvement = true; }
+        if (keyH.bas)    { direction = "bas";     enMouvement = true; }
+        if (keyH.gauche) { direction = "gauche";  enMouvement = true; }
+        if (keyH.droite) { direction = "droite";  enMouvement = true; }
 
         if (enMouvement) {
-
-            // Vérifier les collisions AVANT de bouger
             collisionActive = false;
             gp.verificateurCollision.verifier(this);
 
@@ -97,7 +102,6 @@ public class Player extends Entity {
                 }
             }
 
-            // Animation de marche
             compteurAnimation++;
             if (compteurAnimation > 12) {
                 numeroAnimation = (numeroAnimation == 1) ? 2 : 1;
@@ -116,17 +120,15 @@ public class Player extends Entity {
             case "droite": imgActuelle = (numeroAnimation==1) ? droite1 : droite2; break;
         }
 
-        // Le joueur est TOUJOURS dessiné au centre de l'écran
         g2.drawImage(imgActuelle, ecranX, ecranY,
             gp.tailleTuile, gp.tailleTuile, null);
 
-        // DEBUG : affiche la hitbox (on enlèvera plus tard)
+        // DEBUG — supprime ces lignes plus tard
         g2.setColor(Color.RED);
         g2.drawRect(
             ecranX + collision.x,
             ecranY + collision.y,
             collision.width,
-            collision.height
-        );
+            collision.height);
     }
 }

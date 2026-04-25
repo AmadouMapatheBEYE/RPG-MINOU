@@ -2,9 +2,10 @@ import java.awt.event.*;
 
 public class KeyHandler implements KeyListener {
 
-    // true = touche enfoncée, false = relâchée
     public boolean haut, bas, gauche, droite;
-    public boolean interagir;  // touche Entrée pour parler aux PNJ
+    public boolean interagirPresse = false;  // true UNE SEULE frame
+
+    private boolean interagirTenu = false;   // évite la répétition
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -18,8 +19,13 @@ public class KeyHandler implements KeyListener {
             gauche = true;
         if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D)
             droite = true;
-        if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE)
-            interagir = true;
+
+        // Entrée/Espace : détecté UNE seule fois par appui
+        if ((code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE)
+                && !interagirTenu) {
+            interagirPresse = true;
+            interagirTenu   = true;
+        }
     }
 
     @Override
@@ -34,10 +40,18 @@ public class KeyHandler implements KeyListener {
             gauche = false;
         if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D)
             droite = false;
-        if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE)
-            interagir = false;
+
+        if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+            interagirTenu   = false;
+            interagirPresse = false;
+        }
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}  // on n'utilise pas ça
+    public void keyTyped(KeyEvent e) {}
+
+    // Appelé après traitement pour réinitialiser le "pressé"
+    public void resetInteragir() {
+        interagirPresse = false;
+    }
 }
