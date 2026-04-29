@@ -20,7 +20,6 @@ public class Player extends Entity {
         ecranY = gp.hauteurEcran / 2 - gp.tailleTuile / 2;
 
         collision = new Rectangle(8, 16, 32, 32);
-
         reinitialiser();
         chargerImages();
     }
@@ -42,43 +41,31 @@ public class Player extends Entity {
             gauche2 = chargerSprite("kai", "gauche_2");
             droite1 = chargerSprite("kai", "droite_1");
             droite2 = chargerSprite("kai", "droite_2");
-            System.out.println("Sprites de Kai charges");
+            System.out.println("Sprites Kai charges");
         } catch (Exception e) {
-            System.out.println("Sprites non trouves, placeholders utilises.");
+            System.out.println("Sprites non trouves, placeholders.");
             chargerPlaceholders();
         }
     }
 
-    private BufferedImage chargerSprite(String perso, String nom)
-            throws Exception {
-        return ImageIO.read(
-            new File("assets/sprites/" + perso + "/" + nom + ".png"));
+    private BufferedImage chargerSprite(String perso, String nom) throws Exception {
+        return ImageIO.read(new File("assets/sprites/" + perso + "/" + nom + ".png"));
     }
 
     private void chargerPlaceholders() {
-        bas1 = bas2 = haut1 = haut2 =
-        gauche1 = gauche2 = droite1 = droite2 =
-            creerSpritePlaceholder(new Color(100, 149, 237));
+        BufferedImage ph = creerPlaceholder(new Color(100, 149, 237));
+        bas1 = bas2 = haut1 = haut2 = gauche1 = gauche2 = droite1 = droite2 = ph;
     }
 
-    private BufferedImage creerSpritePlaceholder(Color couleur) {
+    private BufferedImage creerPlaceholder(Color couleur) {
         BufferedImage img = new BufferedImage(
-            gp.tailleTuile, gp.tailleTuile,
-            BufferedImage.TYPE_INT_ARGB);
+            gp.tailleTuile, gp.tailleTuile, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
-
-        g2.setColor(couleur);
-        g2.fillRect(8, 0, 32, 48);
-
-        g2.setColor(new Color(255, 220, 185));
-        g2.fillOval(12, 0, 24, 24);
-
+        g2.setColor(couleur);         g2.fillRect(8, 0, 32, 48);
+        g2.setColor(new Color(255,220,185)); g2.fillOval(12, 0, 24, 24);
         g2.setColor(Color.BLACK);
-        g2.fillOval(17, 8, 4, 4);
-        g2.fillOval(27, 8, 4, 4);
-
-        g2.dispose();
-        return img;
+        g2.fillOval(17,8,4,4); g2.fillOval(27,8,4,4);
+        g2.dispose(); return img;
     }
 
     public void update() {
@@ -101,7 +88,6 @@ public class Player extends Entity {
                     case "droite": mondeX += vitesse; break;
                 }
             }
-
             compteurAnimation++;
             if (compteurAnimation > 12) {
                 numeroAnimation = (numeroAnimation == 1) ? 2 : 1;
@@ -111,24 +97,14 @@ public class Player extends Entity {
     }
 
     public void draw(Graphics2D g2) {
-        BufferedImage imgActuelle = null;
-
+        BufferedImage img = null;
         switch (direction) {
-            case "haut":   imgActuelle = (numeroAnimation==1) ? haut1   : haut2;   break;
-            case "bas":    imgActuelle = (numeroAnimation==1) ? bas1    : bas2;    break;
-            case "gauche": imgActuelle = (numeroAnimation==1) ? gauche1 : gauche2; break;
-            case "droite": imgActuelle = (numeroAnimation==1) ? droite1 : droite2; break;
+            case "haut":   img = (numeroAnimation==1) ? haut1   : haut2;   break;
+            case "bas":    img = (numeroAnimation==1) ? bas1    : bas2;    break;
+            case "gauche": img = (numeroAnimation==1) ? gauche1 : gauche2; break;
+            case "droite": img = (numeroAnimation==1) ? droite1 : droite2; break;
         }
-
-        g2.drawImage(imgActuelle, ecranX, ecranY,
-            gp.tailleTuile, gp.tailleTuile, null);
-
-        // DEBUG — supprime ces lignes plus tard
-        g2.setColor(Color.RED);
-        g2.drawRect(
-            ecranX + collision.x,
-            ecranY + collision.y,
-            collision.width,
-            collision.height);
+        if (img != null)
+            g2.drawImage(img, ecranX, ecranY, gp.tailleTuile, gp.tailleTuile, null);
     }
 }
